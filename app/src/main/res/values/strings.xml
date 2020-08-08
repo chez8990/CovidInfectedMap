@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Covid Infrected Map</string>
-    <string name="Name">Locations of the infected</string>
+    <string name="title_name">Covid-19 locations in Hong Kong</string>
     <string name="update_button_name">Update</string>
+    <string name="infected_list_title">HK Covid-19 buildings</string>
+    <string name="search_placeholder">Search buildings</string>
+    <string name="maps_api_key">AIzaSyDfvHKVkyoyvhqNgsWSnYOSK8gRZA0uc2A</string>
 </resources>
