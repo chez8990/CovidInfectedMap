@@ -22,6 +22,8 @@ import android.widget.ListView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -48,8 +50,24 @@ public class MainActivity extends AppCompatActivity{
         // Populate infected building list on start
         ListView listView = findViewById(R.id.listView);
 
-        UpdateInfectedList updateInfectedList = new UpdateInfectedList(this, listView);
-        List<String> buildingList = updateInfectedList.makeRequest();
+        // Read building data if it was previously stored
+        BuildingDataLoader buildingDataLoader = new BuildingDataLoader(this, "infectedBuilding.dat");
+        HashSet<String> buildingSet = new HashSet<String>();
+        try {
+            buildingSet = buildingDataLoader.readData();
+            if (buildingSet.isEmpty()){
+                UpdateInfectedList updateInfectedList = new UpdateInfectedList(this, listView);
+                buildingSet = updateInfectedList.makeRequest();
+                buildingDataLoader.storeData(buildingSet);
+            }
+        } catch (Exception e){
+            UpdateInfectedList updateInfectedList = new UpdateInfectedList(this, listView);
+            buildingSet = updateInfectedList.makeRequest();
+            buildingDataLoader.storeData(buildingSet);
+        }
+
+        Log.d("Loaded data", buildingSet.toString());
+        List<String> buildingList= new ArrayList<String>(buildingSet);
         ArrayAdapter arrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_listview, buildingList);
         listView.setAdapter(arrayAdapter);
 

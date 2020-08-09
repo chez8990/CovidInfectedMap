@@ -26,6 +26,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class UpdateInfectedList {
     Context mContext;
@@ -33,32 +36,6 @@ public class UpdateInfectedList {
     public UpdateInfectedList(Context context, ListView listView){
         mContext = context;
         mListView = listView;
-    }
-
-    public void storeData(HashSet<String> buildingNames, String fileName){
-        try {
-            FileOutputStream fos = mContext.openFileOutput(fileName, mContext.MODE_PRIVATE);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(buildingNames);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public void readData(String fileName) {
-        try {
-            FileInputStream fis = mContext.openFileInput(fileName);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            HashSet<String> buildingNames = (HashSet<String>) ois.readObject();
-            return buildingNames
-        } catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Object does not exist");
-        }
-    }
-
-    public List<String> TransformResults(List<String> results){
-
     }
 
     public HashSet<String> makeRequest(){
@@ -72,31 +49,46 @@ public class UpdateInfectedList {
 //        final List<String> buildingArray = new ArrayList<String>();
         final HashSet<String> buildingArray = new HashSet<String>();
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONArray jsonarray = new JSONArray(response);
-                            for (int i = 0; i < jsonarray.length(); i++) {
-                                JSONObject jsonobject = jsonarray.getJSONObject(i);
-                                String buildingName = jsonobject.getString("Building name");
-                                Log.d("Building", buildingName);
-                                buildingArray.add(buildingName);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(mContext, "That didn't work!",
-                        Toast.LENGTH_LONG).show();
-            }
-        });
-        // Add the request to the RequestQueue.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, future, future);
         queue.add(stringRequest);
+        Log.d("Request", "Added");
+        try{
+            String response = future.get(10, TimeUnit.SECONDS);
+//            Log.d("response", response);
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        } catch (ExecutionException e){
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+
+
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        try {
+//                            JSONArray jsonarray = new JSONArray(response);
+//                            for (int i = 0; i < jsonarray.length(); i++) {
+//                                JSONObject jsonobject = jsonarray.getJSONObject(i);
+//                                String buildingName = jsonobject.getString("Building name");
+//                                Log.d("Building", buildingName);
+//                                buildingArray.add(buildingName);
+//                            }
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Toast.makeText(mContext, "That didn't work!",
+//                        Toast.LENGTH_LONG).show();
+//            }
+//        });
+//        // Add the request to the RequestQueue.
+//        queue.add(stringRequest);
         return buildingArray;
     }
 }
